@@ -1,16 +1,41 @@
-import 'package:flutter/widgets.dart';
+import 'dart:async';
 
-class GroupFormWidgetModel {}
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test_application/domain/entity/group.dart';
+import 'package:hive/hive.dart';
+
+class GroupFormWidgetModel {
+  var groupName = '';
+  void saveGroup(BuildContext context) async {
+    if (groupName.isEmpty) return;
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(GroupAdapter());
+    }
+    final box = await Hive.openBox<Group>('groups_box');
+    final group = Group(name: groupName);
+    await box.add(group);
+    Navigator.of(context).pop();
+  }
+}
 
 class GroupFormWidgetModelProvider extends InheritedWidget {
-  const GroupFormWidgetModelProvider({super.key, required this.child})
-      : super(child: child);
+  final GroupFormWidgetModel model;
+  const GroupFormWidgetModelProvider({
+    super.key,
+    required this.model,
+    required Widget child,
+  }) : super(child: child);
 
-  final Widget child;
-
-  static GroupFormWidgetModelProvider? of(BuildContext context) {
+  static GroupFormWidgetModelProvider? watch(BuildContext context) {
     return context
         .dependOnInheritedWidgetOfExactType<GroupFormWidgetModelProvider>();
+  }
+
+  static GroupFormWidgetModelProvider? read(BuildContext context) {
+    final widget = context
+        .getElementForInheritedWidgetOfExactType<GroupFormWidgetModelProvider>()
+        ?.widget;
+    return widget is GroupFormWidgetModelProvider ? widget : null;
   }
 
   @override
