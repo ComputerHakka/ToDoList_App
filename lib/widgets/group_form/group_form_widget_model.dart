@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test_application/domain/entity/group.dart';
 import 'package:hive/hive.dart';
@@ -23,8 +21,8 @@ class GroupFormWidgetModelProvider extends InheritedWidget {
   const GroupFormWidgetModelProvider({
     super.key,
     required this.model,
-    required Widget child,
-  }) : super(child: child);
+    required super.child,
+  });
 
   static GroupFormWidgetModelProvider? watch(BuildContext context) {
     return context
