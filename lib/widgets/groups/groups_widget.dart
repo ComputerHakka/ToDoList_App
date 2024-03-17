@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_test_application/widgets/groups/groups_widget_model.dart';
 
@@ -88,7 +87,7 @@ class _GroupListRowWidget extends StatelessWidget {
         title: Text(group.name),
         trailing: const Icon(Icons.chevron_right),
         onLongPress: () {},
-        onTap: () {},
+        onTap: () => model.showTasks(context, indexInList),
       ),
     );
   }
