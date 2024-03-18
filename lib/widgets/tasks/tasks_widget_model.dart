@@ -1,11 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test_application/domain/entity/task.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
 import '../../domain/entity/group.dart';
 
 class TasksWidgetModel extends ChangeNotifier {
   int groupKey;
   late final Future<Box<Group>> _groupBox;
+  var _tasks = <Task>[];
+
+  List<Task> get tasks => _tasks.toList();
+
   Group? _group;
   Group? get group => _group;
 
@@ -14,7 +22,7 @@ class TasksWidgetModel extends ChangeNotifier {
   }
 
   void showForm(BuildContext context) {
-    Navigator.of(context).pushNamed('/groups/tasks/form');
+    Navigator.of(context).pushNamed('/groups/tasks/form', arguments: groupKey);
   }
 
   void _loadGroup() async {
@@ -23,12 +31,41 @@ class TasksWidgetModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _readTasks() {
+    _tasks = _group?.tasks ?? <Task>[];
+    notifyListeners();
+  }
+
+  void _setupListenTasks() async {
+    final box = await _groupBox;
+    _readTasks();
+    box.listenable(keys: [groupKey]).addListener(_readTasks);
+  }
+
+  void deleteTask(int groupIndex) async {
+    await _group?.tasks?.deleteFromHive(groupIndex);
+    await _group?.save();
+  }
+
+  void doneToggle(int groupIndex) async {
+    final task = group?.tasks?[groupIndex];
+    final currentState = task?.isDone ?? false;
+    task?.isDone = !currentState;
+    await task?.save();
+    notifyListeners();
+  }
+
   void _setup() {
     if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(GroupAdapter());
     }
     _groupBox = Hive.openBox<Group>('groups_box');
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(TaskAdapter());
+    }
+    Hive.openBox<Task>('tasks_box');
     _loadGroup();
+    _setupListenTasks();
   }
 }
 
