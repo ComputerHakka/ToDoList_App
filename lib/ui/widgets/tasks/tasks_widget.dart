@@ -1,33 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flutter_test_application/widgets/tasks/tasks_widget_model.dart';
+import 'package:flutter_test_application/ui/widgets/tasks/tasks_widget_model.dart';
+
+class TasksWidgetConfiguration {
+  final int groupKey;
+  final String title;
+
+  TasksWidgetConfiguration({
+    required this.groupKey,
+    required this.title,
+  });
+}
 
 class TasksWidget extends StatefulWidget {
-  const TasksWidget({super.key});
+  final TasksWidgetConfiguration configuration;
+  const TasksWidget({
+    super.key,
+    required this.configuration,
+  });
 
   @override
   State<TasksWidget> createState() => _TasksWidgetState();
 }
 
 class _TasksWidgetState extends State<TasksWidget> {
-  TasksWidgetModel? _model;
+  late final TasksWidgetModel _model;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_model == null) {
-      final groupKey = ModalRoute.of(context)!.settings.arguments as int;
-      _model = TasksWidgetModel(groupKey: groupKey);
-    }
+  void initState() {
+    super.initState();
+    _model = TasksWidgetModel(configuration: widget.configuration);
   }
 
   @override
   Widget build(BuildContext context) {
     return TasksWidgetModelProvider(
-      model: _model!,
+      model: _model,
       child: const TasksWidgetBody(),
     );
+  }
+
+  @override
+  void dispose() async {
+    await _model.dispose();
+    super.dispose();
   }
 }
 
@@ -37,7 +53,7 @@ class TasksWidgetBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final model = TasksWidgetModelProvider.watch(context)?.model;
-    final title = model?.group?.name ?? 'Задачи';
+    final title = model?.configuration.title ?? 'Задачи';
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
