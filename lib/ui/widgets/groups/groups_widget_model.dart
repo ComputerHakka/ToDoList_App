@@ -51,7 +51,7 @@ class GroupsWidgetModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _setup() async {
+  void _setup() async {
     // Добавлен Future<void>
     _box = BoxManager.instance.openGroupBox();
     await _readGroupsFromHive();

@@ -24,7 +24,7 @@ class BoxManager {
     }
 
     var count = _boxCounter[box.name] ?? 1;
-    count--;
+    count -= 1;
     _boxCounter[box.name] = count;
     if (count > 0) return;
 
